@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="DocumentMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap type="com.ssc.model.Document" id="document">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="id" column="id" />
+		<result property="category" column="category" />
+		<result property="writerName" column="writer_name" />
+		<result property="writerPw" column="writer_pw" />
+		<result property="email" column="email" />
+		<result property="subject" column="subject" />
+		<result property="content" column="content" />
+		<result property="hit" column="hit" />
+		<result property="regDate" column="reg_date" />
+		<result property="editDate" column="edit_date" />
+		<result property="ipAddress" column="ip_address" />
+		<result property="userId" column="user_id" />
+		<result property="imagePath" column="image_path" />
+	</resultMap>
+	
+	<!-- 게시글 정보 저장하기 -->
+	<insert id="insertDocument" parameterType="com.ssc.model.Document"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO document(
+			category, writer_name, email, subject, content, hit, reg_date, edit_date, ip_address,
+			user_id, writer_pw
+		)VALUES(
+			#{category}, #{writerName}, #{email}, #{subject}, #{content}, 0, now(), now(), #{ipAddress},
+			
+			<choose>
+				<when test="userId == 0">
+					null, password(#{writerPw})
+				</when>
+				<otherwise>
+					#{userId}, #{writerPw}
+				</otherwise>
+			</choose>		
+		)
+	</insert>
+	
+<!-- 게시물 하나에 대한 정보를 조회한다. -->
+	<select id="selectDocument"
+		parameterType = "com.ssc.model.Document"
+		resultMap="document">
+		SELECT id, category, writer_name, writer_pw, email, subject, content, hit,
+			DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+			DATE_FORMAT(edit_date, '%Y-%m-%d %H:%i:%s') as edit_date,
+			ip_address, user_id
+		FROM document
+		WHERE category=#{category} AND id=#{id}		
+	</select>
+	
+	<!-- 이전글 정보를 조회한다. -->
+	<select id="selectPrevDocument"
+		parameterType="com.ssc.model.Document"
+		resultMap="document">
+		SELECT id, category, writer_name, writer_pw, email, subject, content, hit,
+			DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+			DATE_FORMAT(edit_date, '%Y-%m-%d %H:%i:%s') as edit_date,
+			ip_address, user_id
+		FROM document
+		WHERE category=#{category} AND id &lt; #{id}
+		ORDER By id DESC
+		LIMIT 0,1			
+	</select>
+	
+	
+	<!-- 다음글 정보를 조회한다. -->
+	<select id="selectNextDocument"
+		parameterType="com.ssc.model.Document"
+		resultMap="document">
+		SELECT id, category, writer_name, writer_pw, email, subject, content, hit,
+			DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+			DATE_FORMAT(edit_date, '%Y-%m-%d %H:%i:%s') as edit_date,
+			ip_address, user_id
+		FROM document
+		WHERE category=#{category} AND id &gt; #{id}
+		ORDER By id ASC
+		LIMIT 0,1			
+	</select>
+	
+	<!-- 조회수 1증가 -->
+	<update id="updateDocumentHit" parameterType="com.ssc.model.Document">
+		UPDATE document SET hit=hit+1 WHERE category=#{category} AND id=#{id}	
+	</update>
+	
+	<!-- 게시물 목록을 조회한다. -->
+	<select id = "selectDocumentList" parameterType = "com.ssc.model.Document" resultMap = "document">
+		SELECT id, category, writer_name, subject, hit,
+				DATE_FORMAT(reg_date, '%Y-%m-%d') as reg_date
+		
+		<if test="review == true || gallery == true">
+			,(SELECT concat(file_dir,'/',file_name) FROM file
+			  WHERE document_id=document.id
+			  		AND
+			  		content_type LIKE ('image/%')
+			  ORDER BY id ASC LIMIT 0,1
+			)as image_path
+		</if>
+		
+		FROM document
+
+		<where>
+			category=#{category}
+			<if test="subject != null or content != null">
+				AND(
+					<if test="subject != null">
+						subject LIKE concat('%', #{subject}, '%')
+					</if>
+					<if test ="content != null">
+						OR content LIKE concat('%',#{content}, '%')
+					</if>
+				)
+			</if>
+		</where>
+			
+		ORDER BY id DESC
+		LIMIT #{limitStart}, #{listCount}
+	</select>
+	
+	<!-- 전체 게시물 수를 조회한다. -->
+	<select id="selectDocumentCount" parameterType="com.ssc.model.Document" resultType="int">
+		SELECT COUNT(id) FROM document
+		<where>
+			category=#{category}
+			<if test = "subject != null or content !=null">
+				AND(
+					<if test="subject != null">
+						subject LIKE concat('%', #{subject}, '%')
+					</if>
+					<if test="content !=null">
+						OR content LIKE concat('%',#{content}, '%')
+					</if>
+				)
+			</if>
+		</where>
+	</select>
+	
+	<!-- 자신의 게시물인지 검사한다 -->
+	<select id="selectDocumentCountByMemberId" parameterType="com.ssc.model.Document" resultType="int">
+		SELECT COUNT(id) FROM document
+		WHERE category=#{category} AND id=#{id} AND user_id=#{userId}
+	</select>
+	
+	<!-- 비밀번호를 검사한다. -->
+	<select id="selectDocumentCountByPw" parameterType="com.ssc.model.Document" resultType="int">
+		SELECT COUNT(id) FROM document
+		WHERE category=#{category} AND id=#{id} AND writer_pw=password(#{writerPw})
+	</select>
+	
+	<!-- 게시글 삭제 하기 -->
+	<delete id="deleteDocument" parameterType="com.ssc.model.Document">
+		DELETE FROM document WHERE id=#{id}
+	</delete>
+	
+	<!-- fk를 제거해주는 구문 -->
+	<delete id ="for" parameterType="com.ssc.model.Document">
+		SET FOREIGN_KEY_CHECKS=0
+	</delete> 
+	
+	
+	
+	<!-- 특정 user_id값을 가진 게시글을 삭제한다. -->
+	<delete id="remove_member_document"  parameterType="com.ssc.model.Document">
+		DELETE FROM document WHERE user_id=#{userId}
+	</delete>	
+	
+	
+	
+	<!-- 게시글 정보 수정하기 -->
+	<update id="updateDocument" parameterType="com.ssc.model.Document">
+		UPDATE document SET
+			category=#{category},
+			writer_name=#{writerName},
+			email=#{email},
+			subject=#{subject},
+			content=#{content},
+			ip_address=#{ipAddress},
+			edit_date=now()
+		WHERE id=#{id}
+	</update>
+	
+	<!-- 특정 회원과의 댓글 참조 해제하기 -->
+	<update id="updateDocumentUserOut" parameterType="com.ssc.model.Document">
+		UPDATE document
+		SET    user_id=NULL, edit_date=now()
+		WHERE  user_id=#{userId}
+	</update>
+	
+	
+</mapper>
+
+		

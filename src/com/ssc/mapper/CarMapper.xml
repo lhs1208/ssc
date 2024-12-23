@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CarMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap type="com.ssc.model.Car" id="car">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="id" column="id" />
+		<result property="carName" column="car_name" />
+		<result property="carKind" column="car_kind" />
+		<result property="carPay" column="car_pay" />
+		<result property="zoneNum" column="zone_num" />
+		<result property="zoneName" column="zone_name" />
+		<result property="carImg" column="car_img" /> 
+		<result property="zoneLat" column="zone_lat" />
+		<result property="zoneLng" column="zone_lng" />
+	</resultMap>
+	
+	<!-- 차 추가 -->
+	<insert id="insertCar" parameterType="com.ssc.model.Car"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO car(
+			car_name, car_kind, car_pay, zone_num, car_img
+		)VALUES(
+			#{carName}, #{carKind}, #{carPay}, #{zoneNum}, #{carImg}
+		)
+		
+	</insert>
+	
+	<!-- 차 수정 -->
+	<update id="updateCar" parameterType="com.ssc.model.Car">
+		UPDATE car SET
+			car_name=#{carName}, car_kind=#{carKind}, car_pay=#{carPay}, zone_num=#{zoneNum}, car_img=#{carImg}
+			
+			WHERE id=#{id}
+	</update>
+	
+	<!-- 차 삭제 -->
+	<delete id="deleteCar" parameterType="com.ssc.model.Car">
+		DELETE FROM car WHERE id=#{id}
+	</delete>
+	
+	<!-- 차 전체 조회 -->
+	<select id="selectCarList" parameterType="com.ssc.model.Car" resultMap="car">		
+		SELECT id, car_name, car_kind, car_pay, zone_num, zone_name
+		FROM car
+        INNER JOIN zone
+        ON zone.num = car.zone_num
+		
+	</select>
+	
+	<!-- 차 상세 조회 -->
+	<select id="selectCar" parameterType="com.ssc.model.Car" resultMap="car">
+		SELECT id, car_name, car_kind, car_pay, zone_num, zone_name, car_img
+		FROM car
+        INNER JOIN zone
+        ON zone.num = car.zone_num
+		WHERE  id=#{id} 
+	</select>
+	
+	 <!-- 자신의 게시물인지 검사한다 -->
+    <select id="selectCarCount" parameterType="com.ssc.model.Car" resultType="int">
+    	SELECT COUNT(id) FROM car
+    </select>
+    
+    <!-- 특정 존에 소속된 차 조회 -->
+    <select id="selectCarZone" parameterType="com.ssc.model.Car" resultMap="car">
+		SELECT id, car_name, car_kind, car_pay, zone_num, zone_name, zone_lat, zone_lng, car_img
+		FROM car
+        INNER JOIN zone
+        ON car.zone_num=zone.num
+		WHERE zone_name=#{zoneName}
+    </select>
+
+    <!-- 차 리스트에 페이지번호 제어하는 sql구문 -->
+   <select id="selectCarList2" parameterType="com.ssc.model.Car" resultMap="car">
+    	SELECT id, car_name, car_kind, car_pay, zone_num, zone_name
+		FROM car
+        INNER JOIN zone
+        ON zone.num = car.zone_num
+    	
+    	<where>
+			<if test="carName != null or carKind != null">
+				(
+					<if test="carName != null">
+						car_name LIKE concat('%', #{carName}, '%')
+					</if>
+					<if test ="carKind != null">
+						OR car_kind LIKE concat('%',#{carKind}, '%')
+					</if>
+				)
+			</if>
+		</where>
+    	
+    	ORDER BY num DESC
+    	LIMIT #{limitStart}, #{listCount}
+    </select>
+    
+    
+    <!-- 이전글 정보를 조회한다. -->
+    <select id="selectPrevCar" parameterType="com.ssc.model.Car" resultMap="car">
+    	SELECT id, car_name, car_kind, car_pay, zone_num, zone_name, car_img
+		FROM car
+        INNER JOIN zone
+        ON zone.num = car.zone_num
+		WHERE  id &lt; #{id}
+		ORDER by id DESC
+		LIMIT 0,1
+    </select>
+    
+    <!-- 다음글 정보를 조회한다. -->
+    <select id="selectNextCar" parameterType="com.ssc.model.Car" resultMap="car">
+    	SELECT id, car_name, car_kind, car_pay, zone_num, zone_name, car_img
+		FROM car
+        INNER JOIN zone
+        ON zone.num = car.zone_num
+		WHERE  id &gt; #{id}
+		ORDER by id ASC
+		LIMIT 0,1
+    </select>
+    
+</mapper>
+
+
+		

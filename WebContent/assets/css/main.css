@@ -1,0 +1,207 @@
+/** 폰트 */
+
+
+div.font5 { font: bold italic 50px/100px "궁서"; }
+/**main, login 기타등등 마진 줄때 쓰는 css*/
+#a1{
+	padding-top: 10px;
+}
+
+#b{
+	padding-top: 20px;
+}
+
+
+
+/**푸터 */
+footer {
+	padding: 30px 0;
+}
+
+/**로고*/
+#logo img {
+	width: 200px;
+	height: 100px;
+	margin-bottom: 10px;
+}
+
+#logo {
+	display: block;
+	text-align: center;
+}
+
+
+/**캐러셀 */
+.carousel {
+	width: 100%;
+	height: 400px;
+	margin-bottom: 80px;
+}
+
+.carousel-inner>.item>img {
+	min-width: 100%;
+	height: 400px;
+}
+
+.carousel-inner .carousel-caption {
+	padding-left: 30px;
+	padding-right: 30px;
+	background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.carousel-indicators .active {
+	width: 12px;
+	height: 12px;
+	margin: 0;
+	background-color: #000 !important;
+}
+
+.carousel-indicators li {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	margin: 1px;
+	text-indent: -999px;
+	cursor: pointer;
+	background-color: #000 \9;
+	background-color: rgba(0, 0, 0, 0);
+	border: 1px solid #000;
+	border-radius: 10px;
+}
+
+/** 캐러셀 캡션*/
+@media ( min-width : 768px) {
+	.carousel-caption p {
+		margin-bottom: 20px;
+		font-size: 21px;
+		line-height: 1.4;
+	}
+}
+
+
+
+
+
+
+
+/** 네비바 */
+
+.navbar {
+	position: relative;
+	min-height: 50px;
+	margin-bottom: 0px;
+	border: 1px solid transparent;
+}
+
+.nav-tabs>li>a {
+	margin-right: -50px;
+}
+
+@media ( min-width : 768px ) {
+	.nav>li {
+		margin-left: 70px;
+		margin-right: 20px;
+	}
+}
+.nav>li {
+	
+}
+
+.navbar-inverse .navbar-nav>li>a {
+	color: #fff;
+	font: 18px bold;
+}
+
+.navbar-inverse .navbar-nav>li>a {
+	font-family: Binggrae-Bold;
+}
+
+
+/** 네비바 드랍다운 */
+.dropbtn {
+    background-color: #fff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #000;
+    width: 130px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+    color: #fff;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #ccc;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #eee;
+}
+
+
+/** 스크롤 바 */
+.floating {
+			background-color:#f9f9f9;
+			position: fixed; 
+			right: 50%; 
+			top: 190px; 
+			margin-right: -650px;
+			text-align:center;
+			width:70px;
+
+			
+		 }
+		.floating div:nth-child(1){
+		 	
+		   border-radius: 8px;
+		}
+		.floating div:nth-child(2){
+			
+		   border-radius: 8px;
+		}
+		.floating  div:nth-child(3){
+			
+		   border-radius: 8px;
+		}
+
+		.floating img{
+			display: block;
+			width: 85px;
+			height: : 85px;
+		}
+
+
+
+
+/** ¸Þ´º¹Ù ÆùÆ® Àû¿ë */
+@font-face {
+	font-family: 'Binggrae-Bold';
+	src: url(Binggrae-Bold.ttf) format('truetype');
+}
+
+h1, h2 {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-weight: 500;
+	line-height: 1.1;
+	color: #000 !important;
+}
+

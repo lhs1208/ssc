@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="BookMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap type="com.ssc.model.Book" id="book">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="bid" column="bid" />
+		<result property="startDate" column="start_date" />
+		<result property="endDate" column="end_date" />
+		<result property="carId" column="car_id" />
+		<result property="carName" column="car_name" />
+		<result property="userId" column="user_id" />
+		<result property="zoneName" column="zone_name" />
+		<result property="uId" column="u_id" />
+	</resultMap>
+	
+	<!-- 예약 정보를 추가한다  -->
+	<insert id="insertBook" parameterType="com.ssc.model.Book" useGeneratedKeys="true" keyProperty="bid">
+		INSERT INTO book (
+		start_date, end_date, car_id, user_id
+		) VALUES (
+		#{startDate}, #{endDate}, #{carId}, #{userId}
+		)
+	</insert>
+	
+
+	
+	<!-- 예약 정보를 삭제한다 -->
+	<delete id="deleteBook" parameterType="com.ssc.model.Book">
+		DELETE FROM book WHERE bid=#{bid};
+	</delete>
+	
+	<!-- 예약 정보를 수정한다 -->
+	<update id="updateBook" parameterType="com.ssc.model.Book">
+		UPDATE book SET 
+			start_date=#{startDate}, end_date=#{endDate}, car_id=#{carId}, user_id=#{userId}
+		WHERE bid=#{bid}
+	</update>
+	
+	<!-- 예약 상세정보를 조회한다 -->
+	<select id="selectBook" parameterType="com.ssc.model.Book" resultMap="book">
+		<!-- "#{변수명}" 으로 표시된 곳에 파라미터로 전달된 Beans의 멤버변수값이 치환된다. -->
+		SELECT
+			start_date, end_date, car_id, user_id
+		FROM book
+		WHERE bid=#{bid}
+	</select>
+	
+	<!-- 예약 정보를 전부 조회한다 -->
+	<select id="selectBookList" parameterType="com.ssc.model.Book" resultMap="book">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT
+			start_date, end_date, car_id, user_id
+			bid, start_date, end_date, car_id, user_id, zone_name, u_id
+		FROM book
+		INNER JOIN car
+		ON book.car_id=car.id
+		INNER JOIN zone
+		ON car.zone_num=zone.num
+		INNER JOIN user
+		ON book.user_id=user.id
+		
+	</select>
+	
+	<!-- 예약 정보를 전부 조회한다 -->
+	<select id="selectBookCar" parameterType="com.ssc.model.Book" resultMap="book">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT
+			bid, DATE_FORMAT(start_date, '%Y%m%d%H') as start_date,
+				DATE_FORMAT(end_date, '%Y%m%d%H') as end_date, car_id, user_id, zone_name
+		FROM book
+		INNER JOIN car
+		ON book.car_id=car.id
+		INNER JOIN zone
+		ON car.zone_num=zone.num
+		WHERE car_id=#{carId}
+		
+	</select>
+	
+	<!-- 게시물 몇개인지 검사한다 -->
+    <select id="selectBookCount" parameterType="com.ssc.model.Book" resultType="int">
+    	SELECT COUNT(bid) FROM book
+    </select>
+    
+    <!-- 검색 -->
+    <select id="selectBookList2" parameterType="com.ssc.model.Book" resultMap="book">
+		SELECT
+			bid, start_date, end_date, car_id, u_id, zone_name
+		FROM book
+		
+		INNER JOIN car
+		ON book.car_id=car.id
+		
+		INNER JOIN zone
+		ON car.zone_num=zone.num
+		
+		INNER JOIN user
+		ON book.user_id = user.id
+		
+		
+    	
+    	<where>
+			<if test="uId != null or zoneName != null">
+				(
+					<if test="uId != null">
+						u_id LIKE concat('%', #{uId}, '%')
+					</if>
+					<if test ="zoneName != null">
+						OR zone_name LIKE concat('%',#{zoneName}, '%')
+					</if>
+				)
+			</if>
+		</where>
+    	LIMIT #{limitStart}, #{listCount}
+    </select>
+    
+    <select id="selectBookList3" parameterType="com.ssc.model.Book" resultMap="book">
+		SELECT
+			bid, start_date, end_date, car_name, zone_name 
+		FROM book 
+		
+		INNER JOIN car
+		ON book.car_id=car.id
+		
+		INNER JOIN zone
+		ON car.zone_num=zone.num
+		
+		where user_id=#{userId}
+    	
+    	<where>
+			<if test="uId != null or zoneName != null">
+				(
+					<if test="uId != null">
+						u_id LIKE concat('%', #{uId}, '%')
+					</if>
+					<if test ="zoneName != null">
+						OR zone_name LIKE concat('%',#{zoneName}, '%')
+					</if>
+				)
+			</if>
+		</where>
+    	
+    	LIMIT #{limitStart}, #{listCount}
+    </select>
+    
+    <!-- 특정 회원과의 예약 참조 해제하기 -->
+	<update id="updateBookUserOut" parameterType="com.ssc.model.Book">
+		UPDATE book
+		SET    user_id=NULL
+		WHERE  user_id=#{userId}
+	</update>
+    
+    
+	
+</mapper>
+
+
+		

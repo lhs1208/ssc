@@ -1,0 +1,16 @@
+@CHARSET "UTF-8";
+/************* Common *************/
+
+@font-face {
+    font-family: 'Binggrae';
+    src: url(Binggrae.ttf) format('truetype');
+
+    font-family: 'Binggrae-Bold';
+    src: url(Binggrae-Bold.ttf) format('truetype');
+}
+body {
+	font-family: Binggrae;
+}
+#a2 {
+	font-family: Binggrae-Bold;
+}

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ZoneMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap type="com.ssc.model.Zone" id="zone">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="num" column="num" />
+		<result property="zoneName" column="zone_name" />
+		<result property="zoneAddr" column="zone_addr" />
+		<result property="zoneLat" column="zone_lat" />
+		<result property="zoneLng" column="zone_lng" />
+		<result property="zoneRegion1Short" column="zone_region1_short" />
+	</resultMap>
+	
+	<!-- 존 전체 조회 -->
+   <select id="selectZoneList" parameterType="com.ssc.model.Zone" resultMap="zone">
+    	SELECT num,  zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short FROM zone
+    </select>
+    
+    <!-- 존 리스트에 페이지번호 제어하는 sql구문 -->
+   <select id="selectZoneList2" parameterType="com.ssc.model.Zone" resultMap="zone">
+    	SELECT num,  zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short 
+    	FROM zone
+    	
+    	<where>
+			<if test="zoneName != null or zoneAddr != null">
+				(
+					<if test="zoneName != null">
+						zone_name LIKE concat('%', #{zoneName}, '%')
+					</if>
+					<if test ="zoneAddr != null">
+						OR zone_addr LIKE concat('%',#{zoneAddr}, '%')
+					</if>
+				)
+			</if>
+		</where>
+    	
+    	ORDER BY num DESC
+    	LIMIT #{limitStart}, #{listCount}
+    </select>
+    
+    
+    <!-- 존 상세 조회 -->
+    <select id="selectZone" parameterType="com.ssc.model.Zone" resultMap="zone">
+    	SELECT num,  zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short FROM zone
+    	WHERE num=#{num}
+    </select>
+    
+    <!-- 이전글 정보를 조회한다. -->
+    <select id="selectPrevZone" parameterType="com.ssc.model.Zone" resultMap="zone">
+    	SELECT num,  zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short 
+    	FROM zone
+    	WHERE num &lt; #{num}
+    	ORDER by num DESC
+    	LIMIT 0,1
+    </select>
+    
+    <!-- 다음글 정보를 조회한다. -->
+    <select id="selectNextZone" parameterType="com.ssc.model.Zone" resultMap="zone">
+    	SELECT num,  zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short FROM zone
+    	WHERE num &gt; #{num}
+    	ORDER by num ASC
+    	LIMIT 0,1
+    </select>
+    
+    <!-- 게시물 몇개인지 검사한다 -->
+    <select id="selectZoneCount" parameterType="com.ssc.model.Zone" resultType="int">
+    	SELECT COUNT(num) FROM zone
+    </select>
+    
+    <!-- 존 추가 -->
+    <insert id="insertZone" parameterType="com.ssc.model.Zone"
+    useGeneratedKeys="true" keyProperty="num">
+    	INSERT INTO zone(
+    		zone_name, zone_addr, zone_lat, zone_lng, zone_region1_short
+    	
+    		
+    	)VALUES(
+    		#{zoneName}, #{zoneAddr}, #{zoneLat}, #{zoneLng}, #{zoneRegion1Short} 
+    		
+    	)
+    </insert>
+    
+    <!-- zone 정보 수정하기 -->
+	<update id="updateZone" parameterType="com.ssc.model.Zone">
+		UPDATE zone SET
+			zone_name = #{zoneName},
+			zone_addr=#{zoneAddr},
+			zone_lat=#{zoneLat},
+			zone_lng=#{zoneLng},
+			zone_region1_short=#{zoneRegion1Short}
+		WHERE num=#{num}
+	</update>
+    
+    <!-- 존 삭제 -->
+    <delete id="deleteZone" parameterType="com.ssc.model.Zone">
+    	DELETE FROM zone WHERE num=#{num}
+    </delete>
+</mapper>
+
+
+		

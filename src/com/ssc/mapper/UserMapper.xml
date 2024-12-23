@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="UserMapper">
+	
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap type="com.ssc.model.User" id="user">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="id" column="id"/>
+		<result property="uId" column="u_id"/>
+		<result property="uPw" column="u_pw"/>
+		<result property="name" column="name"/>
+		<result property="addr1" column="addr1"/>
+		<result property="addr2" column="addr2"/>
+		<result property="tel" column="tel"/>
+		<result property="email" column="email"/>
+		<result property="gender" column="gender"/>
+		<result property="emailYn" column="email_yn"/>
+		<result property="useArea" column="use_area"/>
+		<result property="regDate" column="reg_date"/>
+		<result property="editDate" column="edit_date"/>
+		<result property="profileImg" column="profile_img"/>
+		<result property="licNum" column="lic_num"/>
+		<result property="birthdate" column="birthdate"/>
+		<result property="postcode" column="postcode"/>
+	</resultMap>
+	
+	<!-- admin user sql 구문  시작-->
+	<!-- 아이디전체 조회 -->
+	<select id="selectuIdList" parameterType="com.ssc.model.User" resultMap="user">
+		SELECT id, u_id, u_pw, name, addr1, addr2, tel, email, gender, email_yn, use_area, reg_date,
+		edit_date, profile_img, lic_num, birthdate, postcode 
+		FROM user
+	</select>
+	
+	<!-- id가 몇개인지 검사한다 -->
+	<select id="selectIdCount" parameterType ="com.ssc.model.User" resultType = "int">
+		SELECT COUNT(id) FROM user
+	</select>
+	
+
+	
+	<select id="selectPrevUser" parameterType ="com.ssc.model.User" resultMap = "user">
+		SELECT id, u_id, u_pw, name, addr1, addr2, tel, email, gender, email_yn, use_area, reg_date,
+		edit_date, profile_img, lic_num, birthdate, postcode 
+		FROM user
+		where u_id &lt; #{uId}
+		ORDER by u_id DESC
+		LIMIT 0,1
+	</select>
+	
+	<select id="selectNextUser" parameterType ="com.ssc.model.User" resultMap = "user">
+		SELECT id, u_id, u_pw, name, addr1, addr2, tel, email, gender, email_yn, use_area, reg_date,
+		edit_date, profile_img, lic_num, birthdate, postcode 
+		FROM user
+		where u_id &gt; #{uId}
+		ORDER by u_id ASC
+		LIMIT 0,1
+	</select>
+	
+	
+	<!-- admin user sql 구문  끝-->
+	
+
+	<!-- 아이디 찾기 -->
+	<select id="selectFindId" parameterType="com.ssc.model.User" resultMap="user">
+		SELECT u_id 
+		FROM user
+		WHERE name=#{name} AND email=#{email}
+	</select>
+	
+	
+	<!-- 아이디 중복검사를 수행한다. -->
+	<select id="selectuIdCount" parameterType="com.ssc.model.User"
+	resultType="int">
+		SELECT count(id) FROM user WHERE u_id=#{uId}
+	</select>
+	
+	<!-- 이메일 중복검사를 수행한다. -->
+	<select id="selectEmailCount" parameterType="com.ssc.model.User"
+	resultType="int">
+		SELECT count(id) FROM user WHERE email=#{email}
+	</select>
+	
+	<!-- 회원정보를 저장한다. : 가입  -->
+	<insert id="insertUser" parameterType="com.ssc.model.User"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO user(
+			name, u_id, u_pw, postcode, addr1, addr2, tel, email, gender, email_yn, use_area,
+			reg_date, edit_date, profile_img, lic_num, birthdate
+			)VALUES(
+				#{name}, #{uId}, #{uPw}, #{postcode}, #{addr1}, #{addr2}, #{tel}, #{email}, #{gender}, #{emailYn}, 
+				#{useArea}, now(), now(), #{profileImg}, #{licNum}, #{birthdate}
+			)
+	</insert>
+	
+	<!--아이디와 비밀번호가 일치하는 회원정보를 조회한다.-->
+	<select id="selectLoginInfo" parameterType="com.ssc.model.User"
+	resultMap="user">
+		SELECT
+			id, u_id, u_pw, name, postcode, addr1, addr2, tel, email, 
+			gender, email_yn, use_area, reg_date, edit_date, profile_img, lic_num, DATE_FORMAT(birthdate, '%Y-%m-%d') AS birthdate
+		FROM user
+			WHERE u_id=#{uId} AND u_pw=#{uPw}
+			ORDER BY id DESC
+			LIMIT 0,1
+	</select>
+	
+	<!-- 비밀번호 재발급 : 이메일주소가 일치하는 비밀번호를 변경한다. -->
+	<update id="updateUserPasswordByEmail" parameterType="com.ssc.model.User">
+		UPDATE user SET u_pw=#{uPw}, edit_date=now()
+		WHERE email=#{email} AND u_id=#{uId};
+	</update>
+	
+	<!-- 현재 로그인 중인 회원의 비밀번호를 검사한다. -->
+	<select id="selectUserPasswordCount" parameterType="com.ssc.model.User" resultType="int">
+		SELECT count(id) FROM user
+		WHERE id=#{id} AND u_pw=#{uPw}
+	</select>
+	
+	<!-- 회원정보를 삭제한다. : 탈퇴 -->
+	<delete id="deleteUser" parameterType="com.ssc.model.User">
+		DELETE FROM user WHERE u_id=#{uId};
+	</delete>
+	
+	<!-- admin 회원정보 삭제 -->
+	<delete id="deleteUser2" parameterType="com.ssc.model.User">
+		DELETE FROM user WHERE id=#{id};
+	</delete>
+	
+	
+	<!-- 회원정보를 변경한다. -->
+	<update id="updateUser" parameterType="com.ssc.model.User">
+		UPDATE user SET
+			name=#{name}, u_pw=#{uPw}, postcode=#{postcode}, addr1=#{addr1}, addr2=#{addr2}, 
+			tel=#{tel}, email=#{email}, gender=#{gender}, email_yn=#{emailYn}
+			, use_area=#{useArea}, reg_date=now() , edit_date=now() , profile_img=#{profileImg}, lic_num=#{licNum}
+
+			<if test="newUPw != null and newUPw !=''">
+				,u_pw=password(#{newUPw})
+			</if>
+			<choose>
+				<when test="profileImg == ''">
+					, profile_img=null
+				</when>
+				<when test="profileImg != null">
+					,profile_img=#{profileImg}
+				</when>
+			</choose>
+			WHERE id=#{id}
+	</update>
+	
+	<!-- 일련번호에 의한 회원정보 조회 -->
+	<select id="selectUser" parameterType="com.ssc.model.User" resultMap="user">
+		SELECT
+		id,name,u_id,u_pw,email,gender,postcode,addr1,addr2,
+		tel,email_yn,use_area,reg_date,edit_date,profile_img,lic_num, DATE_FORMAT(birthdate, '%Y-%m-%d') AS birthdate
+		FROM user
+		WHERE id=#{id}
+	</select> 
+	
+</mapper>
+
+
+		

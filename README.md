@@ -1,4 +1,4 @@
-SSCCAR: Car Sharing Reservation System
+**SSCCAR: Car Sharing Reservation System**
 
 **🚗 프로젝트 소개**
 SSCCAR는 사용자 친화적인 실시간 예약 시스템을 제공하는 카셰어링 플랫폼입니다. 
